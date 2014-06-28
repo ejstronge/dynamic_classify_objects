@@ -284,6 +284,19 @@ class ClassifyObjects(cpm.CPModule):
             the low and high threshold"""
         ))
         
+        group.append("wants_image_based_low_threshold", cps.Binary(
+            "Use an image measurement as a threshold", False,doc="""
+            Select <i>%(YES)s</i> to set a threshold using a parameter from
+            the image associated with the selected objects.
+            <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
+            used for each image."""%globals()))
+        
+        group.append('low_threshold_measurement', cps.Measurement(
+            "Measurement to use for threshold", cpmeas.IMAGE, doc="""
+            Choose the measurement to use in determining the threshold value. 
+            This must be a measurement made by some previous module on 
+            the whole image."""))
+        
         group.append("low_threshold", cps.Float(
             "Lower threshold", 0,doc="""
             <i>(Used only if Evenly spaced bins selected)</i><br>
@@ -299,6 +312,19 @@ class ClassifyObjects(cpm.CPModule):
         
         def min_upper_threshold():
             return group.low_threshold.value + np.finfo(float).eps
+        
+        group.append("wants_image_based_high_threshold", cps.Binary(
+            "Use an image measurement as a threshold", False,doc="""
+            Select <i>%(YES)s</i> to set a threshold using a parameter from
+            the image associated with the selected objects.
+            <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
+            used for each image."""%globals()))
+        
+        group.append('high_threshold_measurement', cps.Measurement(
+            "Measurement to use for threshold", cpmeas.IMAGE, doc="""
+            Choose the measurement to use in determining the threshold value. 
+            This must be a measurement made by some previous module on 
+            the whole image."""))
         
         group.append("high_threshold", cps.Float(
             "Upper threshold", 1,
@@ -466,9 +492,20 @@ class ClassifyObjects(cpm.CPModule):
                 result += [group.object_name, group.measurement,
                            group.bin_choice]
                 if group.bin_choice == BC_EVEN:
-                    result += [group.bin_count, 
-                               group.low_threshold, group.wants_low_bin,
-                               group.high_threshold, group.wants_high_bin]
+                    result += [group.bin_count]
+                    for dynamic_threshold, measurement, static_threshold,\
+                        extra_bin in (
+                            (group.wants_image_based_low_threshold,
+                                group.low_threshold_measurement,
+                                group.low_threshold, group.wants_low_bin),
+                            (group.wants_image_based_high_threshold,
+                                group.high_threshold_measurement,
+                                group.high_threshold, group.wants_high_bin)):
+                        result += [dynamic_threshold]
+                        if not dynamic_threshold:
+                            result += [static_threshold, extra_bin]
+                        else:
+                            measurement
                 else:
                     result += [group.custom_thresholds,
                                group.wants_low_bin, group.wants_high_bin]
