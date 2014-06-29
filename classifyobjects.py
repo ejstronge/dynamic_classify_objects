@@ -291,6 +291,14 @@ class ClassifyObjects(cpm.CPModule):
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
             used for each image."""%globals()))
         
+        group.append('low_threshold_image', cps.ImageNameSubscriber(
+            "Image for low threshold measurement", cps.NONE, doc="""
+            Choose the image whose measurement will be used to set a threshold.
+            This can be any image created or loaded by a previous module.
+            <b>If the objects to be classified were identified in an image,
+            you should select that image here</b>."""))
+        def object_fn():
+            return group.low_threshold_image.value
         group.append('low_threshold_measurement', cps.Measurement(
             "Measurement to use for threshold", cpmeas.IMAGE, doc="""
             Choose the measurement to use in determining the threshold value. 
@@ -320,6 +328,14 @@ class ClassifyObjects(cpm.CPModule):
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
             used for each image."""%globals()))
         
+        group.append('high_threshold_image', cps.ImageNameSubscriber(
+            "Image for high threshold measurement", cps.NONE, doc="""
+            Choose the image whose measurement will be used to set a threshold.
+            This can be any image created or loaded by a previous module.
+            <b>If the objects to be classified were identified in an image,
+            you should select that image here</b>."""))
+        def object_fn():
+            return group.high_threshold_image.value
         group.append('high_threshold_measurement', cps.Measurement(
             "Measurement to use for threshold", cpmeas.IMAGE, doc="""
             Choose the measurement to use in determining the threshold value. 
@@ -493,12 +509,14 @@ class ClassifyObjects(cpm.CPModule):
                            group.bin_choice]
                 if group.bin_choice == BC_EVEN:
                     result += [group.bin_count]
-                    for dynamic_threshold, measurement, static_threshold,\
-                        extra_bin in (
+                    for dynamic_threshold, img_name, measurement,\
+                        static_threshold, extra_bin in (
                             (group.wants_image_based_low_threshold,
+                                group.low_threshold_image,
                                 group.low_threshold_measurement,
                                 group.low_threshold, group.wants_low_bin),
                             (group.wants_image_based_high_threshold,
+                                group.high_threshold_image,
                                 group.high_threshold_measurement,
                                 group.high_threshold, group.wants_high_bin)):
                         result += [dynamic_threshold]
