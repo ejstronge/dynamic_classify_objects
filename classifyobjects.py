@@ -297,10 +297,11 @@ class ClassifyObjects(cpm.CPModule):
             This can be any image created or loaded by a previous module.
             <b>If the objects to be classified were identified in an image,
             you should select that image here</b>."""))
+
         def object_fn():
             return group.low_threshold_image.value
         group.append('low_threshold_measurement', cps.Measurement(
-            "Measurement to use for threshold", cpmeas.IMAGE, doc="""
+            "Measurement to use for threshold", object_fn, doc="""
             Choose the measurement to use in determining the threshold value. 
             This must be a measurement made by some previous module on 
             the whole image."""))
@@ -334,10 +335,11 @@ class ClassifyObjects(cpm.CPModule):
             This can be any image created or loaded by a previous module.
             <b>If the objects to be classified were identified in an image,
             you should select that image here</b>."""))
+
         def object_fn():
             return group.high_threshold_image.value
         group.append('high_threshold_measurement', cps.Measurement(
-            "Measurement to use for threshold", cpmeas.IMAGE, doc="""
+            "Measurement to use for threshold", object_fn, doc="""
             Choose the measurement to use in determining the threshold value. 
             This must be a measurement made by some previous module on 
             the whole image."""))
