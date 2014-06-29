@@ -285,7 +285,7 @@ class ClassifyObjects(cpm.CPModule):
         ))
         
         group.append("wants_image_based_low_threshold", cps.Binary(
-            "Use an image measurement as a threshold", False,doc="""
+            "Use an image measurement as a threshold", True, doc="""
             Select <i>%(YES)s</i> to set a threshold using a parameter from
             the image associated with the selected objects.
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
@@ -302,19 +302,19 @@ class ClassifyObjects(cpm.CPModule):
             return group.low_threshold_image.value
         group.append('low_threshold_measurement', cps.Measurement(
             "Measurement to use for threshold", object_fn, doc="""
-            Choose the measurement to use in determining the threshold value. 
-            This must be a measurement made by some previous module on 
+            Choose the measurement to use in determining the threshold value.
+            This must be a measurement made by some previous module on
             the whole image."""))
         
         group.append("low_threshold", cps.Float(
-            "Lower threshold", 0,doc="""
+            "Lower threshold", 0, doc="""
             <i>(Used only if Evenly spaced bins selected)</i><br>
             This is the threshold that separates the lowest bin from the
             others. The lower threshold, upper threshold, and number of bins
             define the thresholds of bins between the lowest and highest."""))
         
-        group.append("wants_low_bin",cps.Binary(
-            "Use a bin for objects below the threshold?", False,doc="""
+        group.append("wants_low_bin", cps.Binary(
+            "Use a bin for objects below the threshold?", False, doc="""
             Select <i>%(YES)s</i> if you want to create a bin for objects
             whose values fall below the low threshold. Select <i>%(NO)s</i>
             if you do not want a bin for these objects."""%globals()))
@@ -323,7 +323,7 @@ class ClassifyObjects(cpm.CPModule):
             return group.low_threshold.value + np.finfo(float).eps
         
         group.append("wants_image_based_high_threshold", cps.Binary(
-            "Use an image measurement as a threshold", False,doc="""
+            "Use an image measurement as a threshold", False, doc="""
             Select <i>%(YES)s</i> to set a threshold using a parameter from
             the image associated with the selected objects.
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
@@ -340,8 +340,8 @@ class ClassifyObjects(cpm.CPModule):
             return group.high_threshold_image.value
         group.append('high_threshold_measurement', cps.Measurement(
             "Measurement to use for threshold", object_fn, doc="""
-            Choose the measurement to use in determining the threshold value. 
-            This must be a measurement made by some previous module on 
+            Choose the measurement to use in determining the threshold value.
+            This must be a measurement made by some previous module on
             the whole image."""))
         
         group.append("high_threshold", cps.Float(
