@@ -284,21 +284,55 @@ class ClassifyObjects(cpm.CPModule):
             the low and high threshold"""
         ))
         
+        group.append("wants_image_based_low_threshold", cps.Binary(
+            "Use an image measurement as a threshold", True, doc="""
+            Select <i>%(YES)s</i> to set a threshold using a parameter from
+            the image associated with the selected objects.
+            <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
+            used for each image."""%globals()))
+
+        group.append("top_threshold_divider", cps.Divider(line=True))
+        
+        def object_fn():
+            return cpmeas.IMAGE
+        group.append('low_threshold_measurement', cps.Measurement(
+            "Measurement to use for threshold", object_fn, doc="""
+            Choose the measurement to use in determining the threshold value.
+            This must be a measurement made by some previous module on
+            the whole image."""))
+        
         group.append("low_threshold", cps.Float(
-            "Lower threshold", 0,doc="""
+            "Lower threshold", 0, doc="""
             <i>(Used only if Evenly spaced bins selected)</i><br>
             This is the threshold that separates the lowest bin from the
             others. The lower threshold, upper threshold, and number of bins
             define the thresholds of bins between the lowest and highest."""))
         
-        group.append("wants_low_bin",cps.Binary(
-            "Use a bin for objects below the threshold?", False,doc="""
+        group.append("wants_low_bin", cps.Binary(
+            "Use a bin for objects below the threshold?", False, doc="""
             Select <i>%(YES)s</i> if you want to create a bin for objects
             whose values fall below the low threshold. Select <i>%(NO)s</i>
             if you do not want a bin for these objects."""%globals()))
         
         def min_upper_threshold():
             return group.low_threshold.value + np.finfo(float).eps
+
+        group.append("middle_threshold_divider", cps.Divider(line=True))
+
+        group.append("wants_image_based_high_threshold", cps.Binary(
+            "Use an image measurement as a threshold", False, doc="""
+            Select <i>%(YES)s</i> to set a threshold using a parameter from
+            the image associated with the selected objects.
+            <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
+            used for each image."""%globals()))
+        
+        def object_fn():
+            return cpmeas.IMAGE
+        group.append('high_threshold_measurement', cps.Measurement(
+            "Measurement to use for threshold", object_fn, doc="""
+            Choose the measurement to use in determining the threshold value.
+            This must be a measurement made by some previous module on
+            the whole image."""))
         
         group.append("high_threshold", cps.Float(
             "Upper threshold", 1,
@@ -313,7 +347,9 @@ class ClassifyObjects(cpm.CPModule):
             Select <i>%(YES)s</i> if you want to create a bin for objects
             whose values are above the high threshold. <br>
             Select <i>%(NO)s</i> if you do not want a bin for these objects."""%globals()))
-        
+
+        group.append("bottom_threshold_divider", cps.Divider(line=True))
+
         group.append("custom_thresholds", cps.Text(
             "Enter the custom thresholds separating the values between bins",
             "0,1",doc="""
@@ -433,7 +469,7 @@ class ClassifyObjects(cpm.CPModule):
                    self.high_low_custom_name, self.high_high_custom_name,
                    self.wants_image, self.image_name]
         return result
-    
+
     def visible_settings(self):
         result = [self.contrast_choice]
         if self.contrast_choice == BY_TWO_MEASUREMENTS:
@@ -466,12 +502,24 @@ class ClassifyObjects(cpm.CPModule):
                 result += [group.object_name, group.measurement,
                            group.bin_choice]
                 if group.bin_choice == BC_EVEN:
-                    result += [group.bin_count, 
-                               group.low_threshold, group.wants_low_bin,
-                               group.high_threshold, group.wants_high_bin]
+                    result += [group.bin_count]
+                    for dynamic_threshold, measurement,\
+                        static_threshold, extra_bin in (
+                            (group.wants_image_based_low_threshold,
+                                group.low_threshold_measurement,
+                                group.low_threshold, group.wants_low_bin),
+                            (group.wants_image_based_high_threshold,
+                                group.high_threshold_measurement,
+                                group.high_threshold, group.wants_high_bin)):
+                        result += [dynamic_threshold]
+                        if not dynamic_threshold:
+                            result += [static_threshold, extra_bin]
+                        else:
+                            result += [measurement]
                 else:
                     result += [group.custom_thresholds,
                                group.wants_low_bin, group.wants_high_bin]
+                result += [group.bottom_threshold_divider]
                 result += [group.wants_custom_names]
                 if group.wants_custom_names:
                     result += [group.bin_names]
@@ -637,8 +685,19 @@ class ClassifyObjects(cpm.CPModule):
         measurements = workspace.measurements
         values = measurements.get_current_measurement(object_name, feature)
         if group.bin_choice == BC_EVEN:
-            low_threshold = group.low_threshold.value
-            high_threshold = group.high_threshold.value
+
+            if group.wants_image_based_low_threshold:
+                low_threshold = measurements.get_current_image_measurement(
+                    group.low_threshold_measurement.value)
+            else:
+                low_threshold = group.low_threshold.value
+
+            if group.wants_image_based_high_threshold:
+                high_threshold = measurements.get_current_image_measurement(
+                    group.high_threshold_measurement.value)
+            else:
+                high_threshold = group.high_threshold.value
+
             bin_count = group.bin_count.value
             thresholds = (np.arange(bin_count+1) *
                           (high_threshold - low_threshold)/float(bin_count) +
