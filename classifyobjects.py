@@ -290,16 +290,11 @@ class ClassifyObjects(cpm.CPModule):
             the image associated with the selected objects.
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
             used for each image."""%globals()))
-        
-        group.append('low_threshold_image', cps.ImageNameSubscriber(
-            "Image for low threshold measurement", cps.NONE, doc="""
-            Choose the image whose measurement will be used to set a threshold.
-            This can be any image created or loaded by a previous module.
-            <b>If the objects to be classified were identified in an image,
-            you should select that image here</b>."""))
 
+        group.append("top_threshold_divider", cps.Divider(line=True))
+        
         def object_fn():
-            return group.low_threshold_image.value
+            return cpmeas.IMAGE
         group.append('low_threshold_measurement', cps.Measurement(
             "Measurement to use for threshold", object_fn, doc="""
             Choose the measurement to use in determining the threshold value.
@@ -321,7 +316,9 @@ class ClassifyObjects(cpm.CPModule):
         
         def min_upper_threshold():
             return group.low_threshold.value + np.finfo(float).eps
-        
+
+        group.append("middle_threshold_divider", cps.Divider(line=True))
+
         group.append("wants_image_based_high_threshold", cps.Binary(
             "Use an image measurement as a threshold", False, doc="""
             Select <i>%(YES)s</i> to set a threshold using a parameter from
@@ -329,15 +326,8 @@ class ClassifyObjects(cpm.CPModule):
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
             used for each image."""%globals()))
         
-        group.append('high_threshold_image', cps.ImageNameSubscriber(
-            "Image for high threshold measurement", cps.NONE, doc="""
-            Choose the image whose measurement will be used to set a threshold.
-            This can be any image created or loaded by a previous module.
-            <b>If the objects to be classified were identified in an image,
-            you should select that image here</b>."""))
-
         def object_fn():
-            return group.high_threshold_image.value
+            return cpmeas.IMAGE
         group.append('high_threshold_measurement', cps.Measurement(
             "Measurement to use for threshold", object_fn, doc="""
             Choose the measurement to use in determining the threshold value.
@@ -357,7 +347,9 @@ class ClassifyObjects(cpm.CPModule):
             Select <i>%(YES)s</i> if you want to create a bin for objects
             whose values are above the high threshold. <br>
             Select <i>%(NO)s</i> if you do not want a bin for these objects."""%globals()))
-        
+
+        group.append("bottom_threshold_divider", cps.Divider(line=True))
+
         group.append("custom_thresholds", cps.Text(
             "Enter the custom thresholds separating the values between bins",
             "0,1",doc="""
@@ -511,24 +503,28 @@ class ClassifyObjects(cpm.CPModule):
                            group.bin_choice]
                 if group.bin_choice == BC_EVEN:
                     result += [group.bin_count]
-                    for dynamic_threshold, img_name, measurement,\
+                    result += [group.top_threshold_divider]
+                    for dynamic_threshold, measurement,\
                         static_threshold, extra_bin in (
                             (group.wants_image_based_low_threshold,
-                                group.low_threshold_image,
                                 group.low_threshold_measurement,
                                 group.low_threshold, group.wants_low_bin),
                             (group.wants_image_based_high_threshold,
-                                group.high_threshold_image,
                                 group.high_threshold_measurement,
                                 group.high_threshold, group.wants_high_bin)):
                         result += [dynamic_threshold]
+                        # Though added twice, the middle divider only appears
+                        # once
                         if not dynamic_threshold:
-                            result += [static_threshold, extra_bin]
+                            result += [group.middle_threshold_divider,
+                                       static_threshold, extra_bin]
                         else:
-                            measurement
+                            result += [group.middle_threshold_divider,
+                                       dynamic_threshold, measurement]
                 else:
                     result += [group.custom_thresholds,
                                group.wants_low_bin, group.wants_high_bin]
+                result += [group.bottom_threshold_divider]
                 result += [group.wants_custom_names]
                 if group.wants_custom_names:
                     result += [group.bin_names]
