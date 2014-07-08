@@ -685,8 +685,19 @@ class ClassifyObjects(cpm.CPModule):
         measurements = workspace.measurements
         values = measurements.get_current_measurement(object_name, feature)
         if group.bin_choice == BC_EVEN:
-            low_threshold = group.low_threshold.value
-            high_threshold = group.high_threshold.value
+
+            if group.wants_image_based_low_threshold:
+                low_threshold = measurements.get_current_image_measurement(
+                    group.low_threshold_measurement.value)
+            else:
+                low_threshold = group.low_threshold.value
+
+            if group.wants_image_based_high_threshold:
+                high_threshold = measurements.get_current_image_measurement(
+                    group.high_threshold_measurement.value)
+            else:
+                high_threshold = group.high_threshold.value
+
             bin_count = group.bin_count.value
             thresholds = (np.arange(bin_count+1) *
                           (high_threshold - low_threshold)/float(bin_count) +
