@@ -469,7 +469,7 @@ class ClassifyObjects(cpm.CPModule):
                    self.high_low_custom_name, self.high_high_custom_name,
                    self.wants_image, self.image_name]
         return result
-    
+
     def visible_settings(self):
         result = [self.contrast_choice]
         if self.contrast_choice == BY_TWO_MEASUREMENTS:
@@ -503,7 +503,6 @@ class ClassifyObjects(cpm.CPModule):
                            group.bin_choice]
                 if group.bin_choice == BC_EVEN:
                     result += [group.bin_count]
-                    result += [group.top_threshold_divider]
                     for dynamic_threshold, measurement,\
                         static_threshold, extra_bin in (
                             (group.wants_image_based_low_threshold,
@@ -513,14 +512,10 @@ class ClassifyObjects(cpm.CPModule):
                                 group.high_threshold_measurement,
                                 group.high_threshold, group.wants_high_bin)):
                         result += [dynamic_threshold]
-                        # Though added twice, the middle divider only appears
-                        # once
                         if not dynamic_threshold:
-                            result += [group.middle_threshold_divider,
-                                       static_threshold, extra_bin]
+                            result += [static_threshold, extra_bin]
                         else:
-                            result += [group.middle_threshold_divider,
-                                       dynamic_threshold, measurement]
+                            result += [measurement]
                 else:
                     result += [group.custom_thresholds,
                                group.wants_low_bin, group.wants_high_bin]
