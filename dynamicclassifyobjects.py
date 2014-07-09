@@ -1,5 +1,7 @@
-'''<b>Classify Objects</b> classifies objects into different classes according 
-to the value of measurements you choose.
+'''<b>Dynamic Classify Objects</b> classifies objects into different classes according 
+to the value of measurements you choose. This modification allows these
+measurements to change for each image in an imageset.
+
 <hr>
 This module classifies objects into a number of different bins
 according to the value of a measurement (e.g., by size, intensity, shape).
@@ -52,15 +54,14 @@ binned into bins above ("high") and below ("low") the cutoff.</li>
 See also <b>CalculateMath</b> and any of the modules in the <b>Measure</b> category.
 '''
 
-# CellProfiler is distributed under the GNU General Public License.
+# This module is distributed under the GNU General Public License.
 # See the accompanying file LICENSE for details.
-# 
+#
 # Copyright (c) 2003-2009 Massachusetts Institute of Technology
 # Copyright (c) 2009-2014 Broad Institute
-# 
-# Please see the AUTHORS file for credits.
-# 
-# Website: http://www.cellprofiler.org
+# Copyright (c) 2014 Edward J. Stronge
+#
+# Cell Profiler website: http://www.cellprofiler.org
 
 
 import cellprofiler.preferences as cpprefs
@@ -86,10 +87,14 @@ M_CATEGORY = "Classify"
 F_PCT_PER_BIN = 'PctObjectsPerBin'
 F_NUM_PER_BIN = 'NumObjectsPerBin'
 
+
 class ClassifyObjects(cpm.CPModule):
     category = "Object Processing"
-    module_name = "ClassifyObjects"
-    variable_revision_number = 2
+    # EJS: This will not try to be backwards compatible with ClassifyObjects
+    # at the moment
+    module_name = "DynamicClassifyObjects"
+    variable_revision_number = 1
+
     def create_settings(self):
         """Create the settings for the module
         
@@ -285,7 +290,7 @@ class ClassifyObjects(cpm.CPModule):
         ))
         
         group.append("wants_image_based_low_threshold", cps.Binary(
-            "Use an image measurement as a threshold", True, doc="""
+            "Use an image measurement as a low threshold", True, doc="""
             Select <i>%(YES)s</i> to set a threshold using a parameter from
             the image associated with the selected objects.
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
@@ -320,7 +325,7 @@ class ClassifyObjects(cpm.CPModule):
         group.append("middle_threshold_divider", cps.Divider(line=True))
 
         group.append("wants_image_based_high_threshold", cps.Binary(
-            "Use an image measurement as a threshold", False, doc="""
+            "Use an image measurement as a high threshold", False, doc="""
             Select <i>%(YES)s</i> to set a threshold using a parameter from
             the image associated with the selected objects.
             <p>Select <i>%(NO)s</i> to specify a single threshold value that will be
@@ -500,7 +505,7 @@ class ClassifyObjects(cpm.CPModule):
                 if group.can_delete:
                     result += [group.divider]
                 result += [group.object_name, group.measurement,
-                           group.bin_choice]
+                           group.bin_choice, group.top_threshold_divider]
                 if group.bin_choice == BC_EVEN:
                     result += [group.bin_count]
                     for dynamic_threshold, measurement,\
@@ -516,6 +521,7 @@ class ClassifyObjects(cpm.CPModule):
                             result += [static_threshold, extra_bin]
                         else:
                             result += [measurement]
+                        result += [group.middle_threshold_divider]
                 else:
                     result += [group.custom_thresholds,
                                group.wants_low_bin, group.wants_high_bin]
@@ -838,112 +844,6 @@ class ClassifyObjects(cpm.CPModule):
         they should leave things as-is so that the caller can report
         an error.
         '''
-        if (from_matlab and 
-            module_name == 'ClassifyObjectsByTwoMeasurements' and
-            variable_revision_number == 2):
-            category = [None,None]
-            feature_name = [None,None]
-            image_name = [None, None]
-            size_scale = [None, None]
-            separator = [None, None]
-            threshold = [None, None]
-            measurement = [None, None]
-            (object_name, category[0], feature_name[0], image_name[0],
-             size_scale[0], category[1], feature_name[1], image_name[1],
-             size_scale[1], separator[0], separator[1], labels,
-             save_colored_objects) = setting_values
-            for i in range(2):
-                measurement[i] = category[i]+'_'+feature_name[i]
-                if len(image_name[i]) > 0:
-                    measurement[i] += '_' + image_name[i]
-                if len(size_scale[i]) > 0:
-                    measurement[i] += '_' + size_scale[i]
-                threshold[i] = ".5"
-                if separator[i] not in (TM_MEAN, TM_MEDIAN):
-                    threshold[i] = separator[i]
-                    separator[i] = TM_CUSTOM
-            split_labels = [x.strip() for x in labels.split(',')]
-            if len(split_labels) < 4:
-                split_labels += [cps.NONE]*(4-len(split_labels))
-            setting_values = [
-                BY_TWO_MEASUREMENTS, "1", cps.NONE, cps.NONE, BC_EVEN,
-                "1", cps.NO, cps.NO, "0", "1", "0,1",cps.NO,
-                "First,Second,Third", cps.NO, "ClassifiedNuclei",
-                object_name, measurement[0], separator[0], threshold[0],
-                measurement[1], separator[1], threshold[1],
-                cps.NO if labels == cps.DO_NOT_USE else cps.YES,
-                split_labels[0], split_labels[1], split_labels[2],
-                split_labels[3],
-                cps.NO if save_colored_objects == cps.DO_NOT_USE else cps.YES,
-                save_colored_objects]
-            from_matlab = False
-            module_name = self.module_name
-            variable_revision_number = 2
-        if (from_matlab and module_name == 'ClassifyObjects' and
-            variable_revision_number == 8):
-            (object_name, category, feature_name, image_name, size_scale,
-             bin_type, bin_specifications, labels, 
-             save_colored_objects) = setting_values
-            measurement = category+'_'+feature_name
-            if len(image_name) > 0:
-                measurement += '_' + image_name
-            if len(size_scale) > 0:
-                measurement += '_' + size_scale
-            bin_count = "1"
-            low_threshold = "0"
-            wants_low_bin = cps.NO
-            high_threshold = "1"
-            wants_high_bin = cps.NO
-            custom_bins = "0,1"
-            if bin_type == BC_EVEN:
-                pieces = bin_specifications.split(',')
-                bin_count = pieces[0]
-                if len(pieces) > 1:
-                    low_threshold = pieces[1]
-                if len(pieces) > 2:
-                    high_threshold = pieces[2]
-            else:
-                custom_bins = bin_specifications
-            wants_labels = cps.NO if labels == cps.DO_NOT_USE else cps.YES
-            setting_values = [
-                BY_SINGLE_MEASUREMENT, "1", object_name, measurement,
-                bin_type, bin_count, low_threshold, wants_low_bin,
-                high_threshold, wants_high_bin,
-                custom_bins, wants_labels, labels,
-                cps.NO if save_colored_objects == cps.DO_NOT_USE else cps.YES,
-                save_colored_objects,
-                object_name, cps.NONE, TM_MEAN, ".5", cps.NONE, TM_MEAN, ".5", 
-                cps.NO, "LowLow","HighLow","LowHigh","HighHigh", cps.NO,
-                "ClassifiedNuclei"]
-            from_matlab = False
-            variable_revision_number = 2
-
-        if variable_revision_number == 1:
-            assert not from_matlab
-            # we modified this in the code but didn't want to bump the variable revision number.
-            if BY_SINGLE_MEASUREMENT in setting_values[0]:
-                contrast_choice = BY_SINGLE_MEASUREMENT
-            else:
-                contrast_choice = BY_TWO_MEASUREMENTS
-            #
-            # We inserted wants_low_bin and wants_high_bin in each group
-            #
-            new_setting_values = [contrast_choice, setting_values[1]]
-            setting_values = setting_values[2:]
-            for i in range(int(new_setting_values[1])):
-                new_setting_values += setting_values[:3]
-                #
-                # Bin count changed: don't count the outer 2 bins
-                #
-                new_setting_values += [str(int(setting_values[3])-2)]
-                new_setting_values += [setting_values[4]]+ [cps.YES]
-                new_setting_values += [setting_values[5]] + [cps.YES]
-                new_setting_values += setting_values[6:11]
-                setting_values = setting_values[11:]
-            new_setting_values += setting_values
-            setting_values = new_setting_values
-            variable_revision_number = 2
-            
         return setting_values, variable_revision_number, from_matlab
 
     def get_measurement_columns(self, pipeline):
