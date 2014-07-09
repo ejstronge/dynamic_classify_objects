@@ -505,9 +505,9 @@ class ClassifyObjects(cpm.CPModule):
                 if group.can_delete:
                     result += [group.divider]
                 result += [group.object_name, group.measurement,
-                           group.bin_choice, group.top_threshold_divider]
+                           group.bin_choice]
                 if group.bin_choice == BC_EVEN:
-                    result += [group.bin_count]
+                    result += [group.bin_count, group.top_threshold_divider]
                     for dynamic_threshold, measurement,\
                         static_threshold, extra_bin in (
                             (group.wants_image_based_low_threshold,
@@ -521,7 +521,8 @@ class ClassifyObjects(cpm.CPModule):
                             result += [static_threshold, extra_bin]
                         else:
                             result += [measurement]
-                        result += [group.middle_threshold_divider]
+                        if group.middle_threshold_divider not in result:
+                            result += [group.middle_threshold_divider]
                 else:
                     result += [group.custom_thresholds,
                                group.wants_low_bin, group.wants_high_bin]
