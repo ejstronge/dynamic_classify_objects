@@ -33,19 +33,15 @@ would.
 
 ## The problem
 
-<p align="center">
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_static.png" 
-  height="389" width="288"></img>
+  ></img>
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_static.png"
-  height="389" width="288"></img>
-</p>
+  ></img>
 
-<p align="center">
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_dynamic.png"
-   height="389" width="288"></img>
+   ></img>
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_dynamic.png"
-  height="389" width="288"></img>
-</p>
+  ></img>
 
 ## A solution
 
