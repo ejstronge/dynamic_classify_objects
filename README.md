@@ -33,15 +33,13 @@ would.
 
 ## The problem
 
-<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_static.png" 
-  ></img>
-<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_static.png"
-  ></img>
+<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_static.png" ></img>
 
-<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_dynamic.png"
-   ></img>
-<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_dynamic.png"
-  ></img>
+<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_static.png" ></img>
+
+<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_dynamic.png" ></img>
+
+<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_dynamic.png" ></img>
 
 ## A solution
 
