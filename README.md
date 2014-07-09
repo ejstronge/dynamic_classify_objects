@@ -34,25 +34,17 @@ would.
 ## The problem
 
 <p align="center">
-<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/input_images/large_img.png"
-  style="float:left"></img>
-
-<img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/input_images/small_img.png"
-  style="float:right"></img>
-</p>
-
-<p align="center">
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_static.png" 
-  style="float:right;" height="389" width="288"></img>
+  height="389" width="288"></img>
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_static.png"
-  style="float:right;" height="389" width="288"></img>
+  height="389" width="288"></img>
 </p>
 
 <p align="center">
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/large_img_dynamic.png"
-   style="float:left;" height="389" width="288"></img>
+   height="389" width="288"></img>
 <img src="https://github.com/ejstronge/dyamic_classify_objects/raw/master/tests/classification_output/small_img_dynamic.png"
-  style="float:right;" height="389" width="288"></img>
+  height="389" width="288"></img>
 </p>
 
 ## A solution
