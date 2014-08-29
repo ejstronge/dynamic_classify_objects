@@ -511,7 +511,8 @@ class ClassifyObjects(cpm.CPModule):
         """Do any sort of adjustment to the settings required for the
         given values
 
-        setting_values - the values for the settings
+        setting_values - the values for the settings. See the
+            ClassifyObjects.settings() function
 
         This method allows a module to specialize itself according to
         the number of settings and their value. For instance, a module
@@ -519,7 +520,7 @@ class ClassifyObjects(cpm.CPModule):
         or decrease the number of relevant settings so they map
         correctly to the values."""
 
-        single_measurement_count = int(setting_values[1])
+        single_measurement_count = int(setting_values[0])
         if single_measurement_count < len(self.single_measurements):
             del self.single_measurements[single_measurement_count:]
         while single_measurement_count > len(self.single_measurements):
